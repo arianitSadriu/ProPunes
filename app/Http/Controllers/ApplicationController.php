@@ -2,6 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Jobs\SendAcceptedMail;
+use App\Jobs\SendAppliedMail;
+use App\Jobs\SendNewApplicationMail;
+use App\Jobs\SendRejectedMail;
+use App\Mail\NewApplication;
+use App\Models\Application;
+use App\Models\Post;
+use App\Models\User;
 use Illuminate\Http\Request;
 
 class ApplicationController extends Controller
