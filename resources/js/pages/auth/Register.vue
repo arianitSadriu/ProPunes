@@ -1,108 +1,269 @@
-<script setup lang="ts">
+<script setup>
+import GuestLayout from '@/Layouts/GuestLayout.vue';
 import InputError from '@/components/InputError.vue';
-import TextLink from '@/components/TextLink.vue';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Spinner } from '@/components/ui/spinner';
-import AuthBase from '@/layouts/AuthLayout.vue';
-import { login } from '@/routes';
-import { store } from '@/routes/register';
-import { Form, Head } from '@inertiajs/vue3';
+import InputLabel from '@/components/InputLabel.vue';
+import PrimaryButton from '@/components/PrimaryButton.vue';
+import TextInput from '@/components/TextInput.vue';
+import { Head, Link, useForm } from '@inertiajs/vue3';
+import {ref} from "vue";
+import ImgInput from "@/components/ImgInput.vue";
+
+defineProps({
+    cities: {
+        type: Array,
+    }
+})
+const input = ref('')
+const form = useForm({
+    name: '',
+    lastname: '',
+    email: '',
+    birthday: '',
+    city: '',
+    gender: '',
+    role: '',
+    phone: '',
+    image: null,
+    password: '',
+    password_confirmation: '',
+});
+const isFocused = ref(false);
+const submit = () => {
+    form.post(route('register'), {
+        onFinish: () => form.reset('password', 'password_confirmation'),
+    });
+};
+const imageSrc = ref('');
+const previewImage = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            imageSrc.value = e.target.result;
+        };
+        reader.readAsDataURL(file);
+    } else {
+        imageSrc.value = '';
+    }
+};
 </script>
 
 <template>
-    <AuthBase
-        title="Create an account"
-        description="Enter your details below to create your account"
-    >
+    <GuestLayout>
         <Head title="Register" />
+        <div class="lg:flex lg:justify-between lg:space-x-60 mb-4">
+        <div class="w-[30rem] my-auto hidden lg:block">
+            <span class="text-6xl text-center font-bold flex justify-center mb-6">Join Us Today</span>
+            <p class="text-center text-lg text-gray-600 mb-6">Create an account to start your journey with us.</p>
+        </div>
+        <div class="z-20 mt-6 w-full overflow-hidden bg-gradient-to-b from-cyan-100 via-white to-white px-6 pb-4 shadow-lg sm:max-w-md sm:rounded-lg">
+            <img src="/storage/images/logo.png" width="150px" height="150px" class="mx-auto" alt="logo">
+            <form @submit.prevent="submit">
+            <div class="flex justify-between mt-4 h-full items-center">
+                <div class="w-1/2 h-full space-y-12">
+                    <div>
+                        <ImgInput
+                            id="image"
+                            accept="image/*"
+                            class="hidden"
+                            name="image"
+                            v-model="form.image"
+                            @change="previewImage"
+                            autocomplete="image"
+                        />
+                        <InputError class="mt-2" :message="form.errors.image"/>
+                    </div>
+                    <div>
+                        <label for="image"
+                               class="text-white bg-blue-700 hover:bg-blue-800 font-medium rounded-lg text-sm px-2 py-2.5 hover:cursor-pointer dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">
+                            Choose Image
+                        </label>
+                    </div>
 
-        <Form
-            v-bind="store.form()"
-            :reset-on-success="['password', 'password_confirmation']"
-            v-slot="{ errors, processing }"
-            class="flex flex-col gap-6"
-        >
-            <div class="grid gap-6">
-                <div class="grid gap-2">
-                    <Label for="name">Name</Label>
-                    <Input
+                </div>
+
+                <div class="w-1/2">
+                    <div v-if="imageSrc" class="items-center flex justify-center">
+                        <img :src="imageSrc" alt="Image Preview"
+                             class="w-28 h-28 object-cover rounded-full border-2 border-cyan-200"/>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex justify-between space-x-1 mt-4">
+                <div class="w-1/2">
+
+                    <TextInput
                         id="name"
                         type="text"
+                        class="mt-1 block w-full pl-3"
+                        placeholder="Name"
+                        v-model="form.name"
                         required
                         autofocus
-                        :tabindex="1"
                         autocomplete="name"
-                        name="name"
-                        placeholder="Full name"
                     />
-                    <InputError :message="errors.name" />
+
+                    <InputError class="mt-2" :message="form.errors.name" />
                 </div>
 
-                <div class="grid gap-2">
-                    <Label for="email">Email address</Label>
-                    <Input
-                        id="email"
-                        type="email"
-                        required
-                        :tabindex="2"
-                        autocomplete="email"
-                        name="email"
-                        placeholder="email@example.com"
-                    />
-                    <InputError :message="errors.email" />
-                </div>
+                <div class="w-1/2">
 
-                <div class="grid gap-2">
-                    <Label for="password">Password</Label>
-                    <Input
+                    <TextInput
+                        id="lastname"
+                        type="text"
+                        class="mt-1 block w-full pl-3"
+                        placeholder="Lastname"
+                        v-model="form.lastname"
+                        autocomplete="lastname"
+                    />
+
+                    <InputError class="mt-2" :message="form.errors.lastname"/>
+                </div>
+            </div>
+            <div class="mt-4">
+
+                <TextInput
+                    id="email"
+                    type="email"
+                    class="mt-1 block w-full pl-3"
+                    placeholder="Email"
+                    v-model="form.email"
+                    required
+                    autocomplete="username"
+                />
+
+                <InputError class="mt-2" :message="form.errors.email" />
+            </div>
+
+            <div class="mt-4">
+                <TextInput
+                    id="birthday"
+                    type="date"
+                    class="mt-1 block w-full pl-3"
+                    placeholder="Birthday"
+                    v-model="form.birthday"
+                    autocomplete="birthday"
+                />
+
+                <InputError class="mt-2" :message="form.errors.birthday"/>
+            </div>
+
+            <div class="flex justify-between space-x-1 mt-4">
+                <div class="w-1/2">
+                    <select
+                        name="city"
+                        id="city"
+                        ref="input"
+                        v-model="form.city"
+                        class="rounded-md border-gray-300 p-1 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 mt-1 pl-3 block w-full"
+                        :class="{'text-gray-500' : !form.city}">
+                        <option disabled value="">City</option>
+                        <option class="text-gray-800" v-for="city in cities" :key="city.id" :value="city.id">{{city.name}}</option>
+                    </select>
+
+                    <InputError class="mt-2" :message="form.errors.city"/>
+                </div>
+                <div class="w-1/2">
+                    <select
+                        name="role"
+                        id="role"
+                        ref="input"
+                        v-model="form.role"
+                        class="rounded-md border-gray-300 p-1 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 mt-1 block w-full pl-3"
+                        :class="{'text-gray-500' : !form.role}">
+                        <option disabled value="">Role</option>
+                        <option class="text-gray-800" value="employer">Employer</option>
+                        <option class="text-gray-800" value="employee">Employee</option>
+                    </select>
+
+                    <InputError class="mt-2" :message="form.errors.role"/>
+                </div>
+            </div>
+
+            <div class="flex justify-between space-x-1 mt-4">
+                <div class="w-1/2">
+                    <TextInput
+                        id="phone"
+                        type="text"
+                        class="mt-1 block w-full pl-3"
+                        placeholder="Phone"
+                        v-model="form.phone"
+                        autocomplete="phone"
+                    />
+
+                    <InputError class="mt-2" :message="form.errors.phone"/>
+                </div>
+                <div class="w-1/2">
+                    <select
+                        name="gender"
+                        id="gender"
+                        ref="input"
+                        v-model="form.gender"
+                        class="rounded-md border-gray-300 p-1 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 mt-1 block w-full pl-3"
+                        :class="{'text-gray-500' : !form.gender}">
+                        <option disabled value="">Gender</option>
+                        <option class="text-gray-800" value="female">Female</option>
+                        <option class="text-gray-800" value="male">Male</option>
+                    </select>
+
+                    <InputError class="mt-2" :message="form.errors.gender"/>
+                </div>
+            </div>
+
+            <div class="flex justify-between space-x-1 mt-4">
+                <div class="w-1/2">
+                    <TextInput
                         id="password"
                         type="password"
-                        required
-                        :tabindex="3"
-                        autocomplete="new-password"
-                        name="password"
+                        class="mt-1 block w-full pl-3"
                         placeholder="Password"
+                        v-model="form.password"
+                        required
+                        autocomplete="new-password"
                     />
-                    <InputError :message="errors.password" />
+
+                    <InputError class="mt-2" :message="form.errors.password" />
                 </div>
 
-                <div class="grid gap-2">
-                    <Label for="password_confirmation">Confirm password</Label>
-                    <Input
+                <div class="w-1/2">
+                    <TextInput
                         id="password_confirmation"
                         type="password"
+                        class="mt-1 block w-full pl-3"
+                        placeholder="Confirm Password"
+                        v-model="form.password_confirmation"
                         required
-                        :tabindex="4"
                         autocomplete="new-password"
-                        name="password_confirmation"
-                        placeholder="Confirm password"
                     />
-                    <InputError :message="errors.password_confirmation" />
+
+                    <InputError
+                        class="mt-2"
+                        :message="form.errors.password_confirmation"
+                    />
                 </div>
-
-                <Button
-                    type="submit"
-                    class="mt-2 w-full"
-                    tabindex="5"
-                    :disabled="processing"
-                    data-test="register-user-button"
-                >
-                    <Spinner v-if="processing" />
-                    Create account
-                </Button>
             </div>
 
-            <div class="text-center text-sm text-muted-foreground">
-                Already have an account?
-                <TextLink
-                    :href="login()"
-                    class="underline underline-offset-4"
-                    :tabindex="6"
-                    >Log in</TextLink
+
+
+            <div class="mt-4 flex items-center justify-end">
+                <Link
+                    :href="route('login')"
+                    class="rounded-md text-sm text-gray-600 underline hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
                 >
+                    Already registered?
+                </Link>
+
+                <PrimaryButton
+                    class="ms-4 bg-cyan-700"
+                    :class="{ 'opacity-25': form.processing }"
+                    :disabled="form.processing"
+                >
+                    Register
+                </PrimaryButton>
             </div>
-        </Form>
-    </AuthBase>
+        </form>
+        </div>
+        </div>
+    </GuestLayout>
 </template>

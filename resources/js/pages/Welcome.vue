@@ -89,7 +89,7 @@ defineProps({
                 <img class="w-full height:70vh" :src="'storage/images/jobSearch.png'" alt="dashboard image">
                 <div class="mt-4 md:mt-0">
                     <h2 class="mb-4 text-4xl tracking-tight font-extra-bold text-gray-900 ">Join our platform today and connect with top employers!</h2>
-                    <p class="mb-6 font-light text-gray-700 md:text-lg">FindJob lets you discover exciting career opportunities, apply with ease, and take the next step toward your dream job.</p>
+                    <p class="mb-6 font-light text-gray-700 md:text-lg">ProPunes lets you discover exciting career opportunities, apply with ease, and take the next step toward your dream job.</p>
                     <Link
                         :href="route('jobs.index')"
                         class="inline-flex items-center justify-center px-5 py-3 text-base font-medium text-center text-gray-900 border-b border-gray-700  hover:scale-x-110 transition   "
