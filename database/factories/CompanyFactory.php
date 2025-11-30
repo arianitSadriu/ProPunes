@@ -20,7 +20,7 @@ class CompanyFactory extends Factory
         return [
             'user_id' => User::find(1)->id ?? null,
             'name' => fake()->company(),
-            'image' => 'company/default.png',
+            'image' => 'profile/12455507.png',
             'description' => fake()->paragraph(),
             'address' => fake()->address(),
             'phone' => fake()->phoneNumber(),

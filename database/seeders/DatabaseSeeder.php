@@ -23,7 +23,7 @@ class DatabaseSeeder extends Seeder
         $this->call(CategorySeeder::class);
 
         User::factory()->create([
-            'image' => 'profile/4hHxL9FQTTFkYRHctziAmMYxALh72D1ZkTGBsPZS.jpg',
+            'image' => 'profile/iStock-476085198.jpg',
             'name' => 'Arianit',
             'lastname' => 'Sadriu',
             'email' => 'arianitsa1@gmail.com',
@@ -37,7 +37,7 @@ class DatabaseSeeder extends Seeder
             'email_verified_at' => now(),
         ]);
         User::factory()->create([
-            'image' => 'profile/4hHxL9FQTTFkYRHctziAmMYxALh72D1ZkTGBsPZS.jpg',
+            'image' => 'profile/iStock-476085198.jpg',
             'name' => 'Admin',
             'lastname' => 'Admin',
             'email' => 'admin@gmail.com',
