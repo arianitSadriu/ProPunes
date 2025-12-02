@@ -54,8 +54,8 @@ const renderPdf = async (fileUrl) => {
             const context = canvas.getContext("2d");
 
             // Set scale for rendering
-            const scale = 2;
-            const viewport = page.getViewport({ scale: 1.0 });
+            const scale = 1;
+            const viewport = page.getViewport({ scale: 4.0 });
 
             // Adjust canvas size to match the PDF page size
             canvas.width = viewport.width;
