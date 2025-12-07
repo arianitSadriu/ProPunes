@@ -1,10 +1,22 @@
 <script setup>
+/**
+ * Posts Component
+ * Displays a list of job postings with details including title, salary, location, and applicant count.
+ * Provides functionality to save/unsave posts for authenticated employees.
+ * Shows different views based on user role (employee vs employer/owner).
+ */
 import {formatDistanceToNow} from "date-fns";
 import {Link, useForm, usePage} from "@inertiajs/vue3";
 import InputError from "@/components/InputError.vue";
 import JobsTextInput from "@/components/Jobs/JobsTextInput.vue";
 
 
+/**
+ * Component Props
+ * @property {Object} posts - Paginated posts object containing array of post data
+ * @property {Array} savedPost - Array of saved post IDs for the current user (default: [])
+ * @property {Boolean} searchQueryPerformed - Flag indicating if a search was performed (default: false)
+ */
 const props = defineProps({
     posts: {
         type: Object,
@@ -20,24 +32,55 @@ const props = defineProps({
 })
 console.log('array: ', props.posts)
 
+/**
+ * Truncate text to a specified length and add ellipsis
+ * Prevents overflow of long titles and descriptions
+ * 
+ * @param {string} text - The text to truncate
+ * @param {number} length - Maximum length before truncation
+ * @return {string} Truncated text with ellipsis or original text if shorter than length
+ */
 function truncate(text, length) {
     if (!text) return '';
     return text.length > length ? text.substring(0, length) + '...' : text;
 }
 
 
+/**
+ * Format a date to relative time format (e.g., "2 hours ago")
+ * Uses date-fns library for formatting
+ * 
+ * @param {string|Date} date - The date to format
+ * @return {string} Formatted relative time string
+ */
 function formatTime(date) {
     return formatDistanceToNow(new Date(date), {addSuffix: true});
 }
 
+/**
+ * Inertia.js form instance for managing save/unsave post operations
+ * Contains user_id, post_id, and saved_post_id for tracking saved posts
+ */
 const form = useForm({
     user_id: usePage().props.auth.user.id,
     post_id: null,
     saved_post_id: null,
 })
+
+/**
+ * Submit a save request for a job post
+ * Sends POST request to 'jobs.storeSaved' route to save the post
+ */
 const submitSaved = () => {
     form.post(route('jobs.storeSaved'))
 };
+
+/**
+ * Delete a saved post from the user's saved list
+ * Sends DELETE request to 'jobs.deleteSaved' route
+ * 
+ * @param {number} savedPostId - The ID of the saved post record to delete
+ */
 const deleteSaved = (savedPostId) => {
     form.saved_post_id = savedPostId;
     form.delete(route('jobs.deleteSaved', {id: savedPostId}));
@@ -47,19 +90,27 @@ const deleteSaved = (savedPostId) => {
 
 <template>
 
+    <!-- Loop through each post in the paginated posts data -->
     <div v-for="post in posts.data" id="posts" class="bg-white rounded-lg mb-4 hover:shadow-xl transition w-64 md:w-full mx-auto">
+        <!-- Link to job post details page -->
         <Link
             :href="route('jobs.show', { id: post.id })"
         >
+        <!-- Post header section with company image and main details -->
         <section class="p-6 flex justify-between">
             <div class="grid md:flex justify-start items-center md:space-x-4 w-full">
+                <!-- Company logo image -->
                 <img :src="'storage/'+ post.company.image" class="w-16 h-16 rounded border border-gray-200" alt="">
 
+                    <!-- Post information container -->
                     <div class="space-y-2">
+                    <!-- Job title (truncated) -->
                     <span class="font-bold text-lg md:text-xl break-words">
                         {{ truncate(post.tittle, 20) }}
                     </span>
+                        <!-- Job metadata (type, salary, applicants, location) -->
                         <section class="md:space-x-8 text-xs md:text-base grid grid-cols-2 gap-x-8 md:flex whitespace-nowrap items-center">
+                        <!-- Employment type (Full-Time, Part-Time, Remote) -->
                         <span class="flex items-center gap-x-1">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="#000000" width="20px" height="20px"
                                  viewBox="0 0 24 24"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g
@@ -68,6 +119,7 @@ const deleteSaved = (savedPostId) => {
                                                                d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"></path></g></svg>
                             {{ post.type }}
                         </span>
+                            <!-- Salary range -->
                             <span class="flex items-center gap-x-1">
                             <svg width="20px" height="20px" viewBox="0 0 24 24" fill="none"
                                  xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g
@@ -77,6 +129,7 @@ const deleteSaved = (savedPostId) => {
                                 stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path> </g></svg>
                             ${{ post.salary }}
                         </span>
+                            <!-- Number of available positions/applicants -->
                             <span class="flex items-center gap-x-1">
                             <svg width="20px" height="20px" viewBox="0 0 24 24" fill="none"
                                  xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g
@@ -86,6 +139,7 @@ const deleteSaved = (savedPostId) => {
                                 stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path> </g></svg>
                             {{ post.nrWorkers }} Applicants
                         </span>
+                            <!-- Job location -->
                             <span class="flex items-center gap-x-1">
                             <svg width="20px" height="20px" viewBox="0 0 24 24" fill="none"
                                  xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g
@@ -101,10 +155,13 @@ const deleteSaved = (savedPostId) => {
                     </div>
 
             </div>
+            <!-- "Your Post" indicator - shown if user is the post owner -->
             <div v-if="post.user_id === $page.props.auth.user.id" class="w-1/4 text-end">
                 <h2 class="font-bold text-md md:text-lg text-indigo-950">Your Post</h2>
             </div>
+            <!-- Save/Unsave buttons - only shown for employee users -->
             <div v-if="$page.props.auth.user.role === 'employee'" class="flex justify-end w-1/2 md:items-center items-start">
+                <!-- Save post button - shown if post is not saved -->
                 <button v-if="!savedPost.some(saved => saved.post_id === post.id)" class="hover:scale-105 transition"
                         @click.prevent="() => { form.post_id = post.id; submitSaved(); }" type="submit">
                     <svg width="40px" height="40px" class="border-gray-500 border rounded-lg"
@@ -123,6 +180,7 @@ const deleteSaved = (savedPostId) => {
                         </g>
                     </svg>
                 </button>
+                <!-- Unsave post button - shown if post is already saved (filled bookmark icon) -->
                 <button v-if="savedPost.some(saved => saved.post_id === post.id)"
                         @click.prevent="() => {
                         const savedPostEntry = savedPost.find(saved => saved.post_id === post.id);
@@ -154,22 +212,28 @@ const deleteSaved = (savedPostId) => {
             <div>
             </div>
         </section>
+        <!-- Post description section -->
         <section class="px-6 pb-4 h-20 text-sm md:text-lg">
             <p>
                 {{ truncate(post.description, 80) }}
             </p>
         </section>
+        <!-- Post footer with category badge and creation date -->
         <section class="w-full flex items-center justify-between text-gray-500 px-6 pb-4 mt-2">
+            <!-- Job category badge -->
             <span
                 class="px-4 md:px-8 bg-emerald-300 bg-opacity-50 py-0.5 rounded-lg text-emerald-900 text-center text-xs md:text-sm flex items-center md:text-md">
                 {{post.category.name }}
             </span>
+            <!-- Relative time since post creation -->
             <span class="text-xs md:text-sm ">{{ formatTime(post.created_at) }}</span>
         </section>
         </Link>
     </div>
 
+    <!-- Empty state message when no posts exist -->
     <div v-if="posts.length === 0" class="bg-white rounded-lg mb-4 h-20 flex justify-center items-center ">
+        <!-- Show different message based on whether a search was performed -->
         <span v-if="searchQueryPerformed">NO RESULTS</span>
         <span v-else>NO POSTS YET</span>
     </div>
